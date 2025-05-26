@@ -435,16 +435,20 @@ class QuizController {
     validateCurrentQuestion() {
         switch (this.currentQuestion) {
             case 3: // Stress level
-                if (!document.querySelector('input[name="stress"]:checked')) {
+                const stressSelected = document.querySelector('input[name="stress"]:checked');
+                if (!stressSelected) {
                     this.showValidation('stressValidation', 'Please select your stress level');
                     return false;
                 }
+                this.hideValidation('stressValidation');
                 break;
             case 6: // Chronotype
-                if (!document.querySelector('input[name="chronotype"]:checked')) {
+                const chronoSelected = document.querySelector('input[name="chronotype"]:checked');
+                if (!chronoSelected) {
                     this.showValidation('chronotypeValidation', 'Please select your chronotype');
                     return false;
                 }
+                this.hideValidation('chronotypeValidation');
                 break;
         }
         return true;
