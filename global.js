@@ -327,7 +327,7 @@ class InfoController {
             if (this.currentSection < infoSections.length - 1) {
                 this.goToNext();
             }
-        }, 5000);
+        }, 8000);
     }
 
     stopAutoAdvance() {
