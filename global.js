@@ -342,47 +342,197 @@ class InfoController {
         this.startAutoAdvance();
     }
 }
+// Quiz navigation controller
+class QuizController {
+    constructor() {
+        this.currentQuestion = 1;
+        this.totalQuestions = 6;
+        this.answers = {};
+        this.init();
+    }
 
-function initializePredictions() {
-    // Update slider displays
-    document.getElementById('age').addEventListener('input', function() {
-        document.getElementById('ageValue').textContent = this.value + ' years';
-    });
+    init() {
+        this.setupEventListeners();
+        this.updateProgress();
+        this.updateQuestionCounter();
+    }
 
-    document.getElementById('sleepHours').addEventListener('input', function() {
-        document.getElementById('sleepHoursValue').textContent = this.value + ' hours';
-    });
+    setupEventListeners() {
+        // Navigation buttons
+        document.getElementById('nextQuestion').addEventListener('click', () => this.nextQuestion());
+        document.getElementById('prevQuestion').addEventListener('click', () => this.prevQuestion());
 
-    document.getElementById('sleepLatency').addEventListener('input', function() {
-        document.getElementById('sleepLatencyValue').textContent = this.value + ' minutes';
-    });
+        // Slider updates
+        document.getElementById('age').addEventListener('input', function() {
+            document.getElementById('ageValue').textContent = this.value + ' years';
+        });
 
-    document.getElementById('nightAwakenings').addEventListener('input', function() {
-        document.getElementById('nightAwakeningsValue').textContent = this.value + ' times';
-    });
+        document.getElementById('sleepHours').addEventListener('input', function() {
+            document.getElementById('sleepHoursValue').textContent = this.value + ' hours';
+        });
 
-    // Form submission
-    document.getElementById('sleepQuiz').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
+        document.getElementById('sleepLatency').addEventListener('input', function() {
+            document.getElementById('sleepLatencyValue').textContent = this.value + ' minutes';
+        });
+
+        document.getElementById('nightAwakenings').addEventListener('input', function() {
+            document.getElementById('nightAwakeningsValue').textContent = this.value + ' times';
+        });
+
+        // Radio button validation
+        document.querySelectorAll('input[name="stress"]').forEach(radio => {
+            radio.addEventListener('change', () => this.hideValidation('stressValidation'));
+        });
+
+        document.querySelectorAll('input[name="chronotype"]').forEach(radio => {
+            radio.addEventListener('change', () => this.hideValidation('chronotypeValidation'));
+        });
+    }
+
+    nextQuestion() {
+        // Validate current question
+        if (!this.validateCurrentQuestion()) {
+            return;
+        }
+
+        // Save current answer
+        this.saveCurrentAnswer();
+
+        if (this.currentQuestion < this.totalQuestions) {
+            this.animateToQuestion(this.currentQuestion + 1);
+        } else {
+            // Last question - submit
+            this.submitQuiz();
+        }
+    }
+
+    prevQuestion() {
+        if (this.currentQuestion > 1) {
+            this.animateToQuestion(this.currentQuestion - 1);
+        }
+    }
+
+    animateToQuestion(targetQuestion) {
+        const currentQuestionEl = document.getElementById(`question${this.currentQuestion}`);
+        const targetQuestionEl = document.getElementById(`question${targetQuestion}`);
+
+        // Hide current question
+        currentQuestionEl.classList.remove('active');
+        currentQuestionEl.classList.add('prev');
+
+        // Show target question after a brief delay
+        setTimeout(() => {
+            currentQuestionEl.classList.remove('prev');
+            targetQuestionEl.classList.add('active');
+            
+            this.currentQuestion = targetQuestion;
+            this.updateProgress();
+            this.updateQuestionCounter();
+            this.updateNavigationButtons();
+        }, 200);
+    }
+
+    validateCurrentQuestion() {
+        switch (this.currentQuestion) {
+            case 3: // Stress level
+                if (!document.querySelector('input[name="stress"]:checked')) {
+                    this.showValidation('stressValidation', 'Please select your stress level');
+                    return false;
+                }
+                break;
+            case 6: // Chronotype
+                if (!document.querySelector('input[name="chronotype"]:checked')) {
+                    this.showValidation('chronotypeValidation', 'Please select your chronotype');
+                    return false;
+                }
+                break;
+        }
+        return true;
+    }
+
+    showValidation(elementId, message) {
+        const validation = document.getElementById(elementId);
+        validation.textContent = message;
+        validation.classList.add('error', 'show');
+    }
+
+    hideValidation(elementId) {
+        const validation = document.getElementById(elementId);
+        validation.classList.remove('show');
+    }
+
+    saveCurrentAnswer() {
+        switch (this.currentQuestion) {
+            case 1:
+                this.answers.age = parseInt(document.getElementById('age').value);
+                break;
+            case 2:
+                this.answers.sleepHours = parseFloat(document.getElementById('sleepHours').value);
+                break;
+            case 3:
+                const stress = document.querySelector('input[name="stress"]:checked');
+                if (stress) this.answers.stressLevel = parseInt(stress.value);
+                break;
+            case 4:
+                this.answers.sleepLatency = parseInt(document.getElementById('sleepLatency').value);
+                break;
+            case 5:
+                this.answers.nightAwakenings = parseInt(document.getElementById('nightAwakenings').value);
+                break;
+            case 6:
+                const chronotype = document.querySelector('input[name="chronotype"]:checked');
+                if (chronotype) this.answers.chronotype = parseInt(chronotype.value);
+                break;
+        }
+    }
+
+    updateProgress() {
+        const progress = (this.currentQuestion / this.totalQuestions) * 100;
+        document.getElementById('quizProgressFill').style.width = progress + '%';
+    }
+
+    updateQuestionCounter() {
+        const counterText = `Question ${this.currentQuestion} of ${this.totalQuestions}`;
+        document.getElementById('questionCounter').textContent = counterText;
+        document.getElementById('questionCounterBottom').textContent = counterText;
+    }
+
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevQuestion');
+        const nextBtn = document.getElementById('nextQuestion');
+
+        // Previous button
+        prevBtn.disabled = this.currentQuestion === 1;
+
+        // Next button
+        if (this.currentQuestion === this.totalQuestions) {
+            nextBtn.textContent = 'Get My Match →';
+            nextBtn.classList.add('submit');
+        } else {
+            nextBtn.textContent = 'Next →';
+            nextBtn.classList.remove('submit');
+        }
+    }
+
+    submitQuiz() {
+        // Save final answer
+        this.saveCurrentAnswer();
+
+        // Show results
         document.getElementById('results').classList.add('show');
         document.getElementById('loading').style.display = 'block';
         document.getElementById('matchResults').style.display = 'none';
-        
-        setTimeout(() => {
-            const userProfile = {
-                age: parseInt(document.getElementById('age').value),
-                sleepHours: parseFloat(document.getElementById('sleepHours').value),
-                stressLevel: parseInt(document.querySelector('input[name="stress"]:checked').value),
-                sleepLatency: parseInt(document.getElementById('sleepLatency').value),
-                nightAwakenings: parseInt(document.getElementById('nightAwakenings').value),
-                chronotype: parseInt(document.querySelector('input[name="chronotype"]:checked').value)
-            };
 
-            const match = findBestMatch(userProfile);
-            displayResults(userProfile, match);
+        setTimeout(() => {
+            const match = findBestMatch(this.answers);
+            displayResults(this.answers, match);
         }, 2000);
-    });
+    }
+}
+
+function initializePredictions() {
+    // Initialize quiz controller
+    new QuizController();
 }
 
 function findBestMatch(userProfile) {
