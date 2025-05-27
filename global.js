@@ -58,26 +58,6 @@ const infoSections = [
             ],
             conclusion: "Result: You get matched with participants who have similar sleep patterns and validated scientific measurements."
         }
-    },
-    {
-        title: "Why This Matters",
-        type: "benefits",
-        content: {
-            benefits: [
-                {
-                    title: "Scientific Accuracy",
-                    description: "Unlike generic sleep apps, this uses real research data from controlled studies with validated instruments."
-                },
-                {
-                    title: "Pattern Recognition",
-                    description: "Understand how your sleep patterns compare to others and identify areas for improvement based on research."
-                },
-                {
-                    title: "Evidence-Based Insights",
-                    description: "Get recommendations grounded in sleep science rather than generic advice that may not apply to you."
-                }
-            ]
-        }
     }
 ];
 
