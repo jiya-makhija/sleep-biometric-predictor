@@ -353,12 +353,20 @@ class QuizController {
         this.setupEventListeners();
         this.updateProgress();
         this.updateQuestionCounter();
+        this.showQuestion(1); // Show first question
     }
 
     setupEventListeners() {
         // Navigation buttons
-        document.getElementById('nextQuestion').addEventListener('click', () => this.nextQuestion());
-        document.getElementById('prevQuestion').addEventListener('click', () => this.prevQuestion());
+        document.getElementById('nextQuestion').addEventListener('click', () => {
+            console.log('Next clicked on question', this.currentQuestion);
+            this.nextQuestion();
+        });
+        
+        document.getElementById('prevQuestion').addEventListener('click', () => {
+            console.log('Prev clicked on question', this.currentQuestion);
+            this.prevQuestion();
+        });
 
         // Slider updates
         document.getElementById('age').addEventListener('input', function() {
@@ -376,91 +384,70 @@ class QuizController {
         document.getElementById('nightAwakenings').addEventListener('input', function() {
             document.getElementById('nightAwakeningsValue').textContent = this.value + ' times';
         });
-
-        // Radio button validation
-        document.querySelectorAll('input[name="stress"]').forEach(radio => {
-            radio.addEventListener('change', () => this.hideValidation('stressValidation'));
-        });
-
-        document.querySelectorAll('input[name="chronotype"]').forEach(radio => {
-            radio.addEventListener('change', () => this.hideValidation('chronotypeValidation'));
-        });
     }
 
     nextQuestion() {
-        console.log('Next button clicked, current question:', this.currentQuestion);
-        
+        // Save current answer first
         this.saveCurrentAnswer();
-        console.log('Current answers:', this.answers);
-    
+        
+        // Simple validation only for required questions
+        if (this.currentQuestion === 3) {
+            if (!document.querySelector('input[name="stress"]:checked')) {
+                alert('Please select your stress level');
+                return;
+            }
+        }
+        
+        if (this.currentQuestion === 6) {
+            if (!document.querySelector('input[name="chronotype"]:checked')) {
+                alert('Please select your chronotype');
+                return;
+            }
+        }
+
+        // Move to next question or submit
         if (this.currentQuestion < this.totalQuestions) {
-            console.log('Moving to question:', this.currentQuestion + 1);
-            this.animateToQuestion(this.currentQuestion + 1);
+            this.currentQuestion++;
+            this.showQuestion(this.currentQuestion);
+            this.updateProgress();
+            this.updateQuestionCounter();
+            this.updateNavigationButtons();
         } else {
-            console.log('Submitting quiz');
             this.submitQuiz();
         }
     }
 
     prevQuestion() {
         if (this.currentQuestion > 1) {
-            this.animateToQuestion(this.currentQuestion - 1);
-        }
-    }
-
-    animateToQuestion(targetQuestion) {
-        const currentQuestionEl = document.getElementById(`question${this.currentQuestion}`);
-        const targetQuestionEl = document.getElementById(`question${targetQuestion}`);
-
-        currentQuestionEl.classList.remove('active');
-        currentQuestionEl.classList.add('prev');
-
-        // Show target question after a brief delay
-        setTimeout(() => {
-            currentQuestionEl.classList.remove('prev');
-            targetQuestionEl.classList.add('active');
-            
-            this.currentQuestion = targetQuestion;
+            this.currentQuestion--;
+            this.showQuestion(this.currentQuestion);
             this.updateProgress();
             this.updateQuestionCounter();
             this.updateNavigationButtons();
-        }, 200);
-    }
-
-    validateCurrentQuestion() {
-        switch (this.currentQuestion) {
-            case 3: // Stress level
-                const stressSelected = document.querySelector('input[name="stress"]:checked');
-                if (!stressSelected) {
-                    this.showValidation('stressValidation', 'Please select your stress level');
-                    return false;
-                }
-                this.hideValidation('stressValidation');
-                break;
-            case 6: // Chronotype
-                const chronoSelected = document.querySelector('input[name="chronotype"]:checked');
-                if (!chronoSelected) {
-                    this.showValidation('chronotypeValidation', 'Please select your chronotype');
-                    return false;
-                }
-                this.hideValidation('chronotypeValidation');
-                break;
         }
-        return true;
     }
 
-    showValidation(elementId, message) {
-        const validation = document.getElementById(elementId);
-        validation.textContent = message;
-        validation.classList.add('error', 'show');
-    }
-
-    hideValidation(elementId) {
-        const validation = document.getElementById(elementId);
-        validation.classList.remove('show');
+    showQuestion(questionNum) {
+        // Hide all questions
+        for (let i = 1; i <= this.totalQuestions; i++) {
+            const q = document.getElementById(`question${i}`);
+            if (q) {
+                q.style.display = 'none';
+                q.classList.remove('active');
+            }
+        }
+        
+        // Show current question
+        const currentQ = document.getElementById(`question${questionNum}`);
+        if (currentQ) {
+            currentQ.style.display = 'block';
+            currentQ.classList.add('active');
+        }
     }
 
     saveCurrentAnswer() {
+        console.log('Saving answer for question', this.currentQuestion);
+        
         switch (this.currentQuestion) {
             case 1:
                 this.answers.age = parseInt(document.getElementById('age').value);
@@ -483,41 +470,48 @@ class QuizController {
                 if (chronotype) this.answers.chronotype = parseInt(chronotype.value);
                 break;
         }
+        
+        console.log('Current answers:', this.answers);
     }
 
     updateProgress() {
         const progress = (this.currentQuestion / this.totalQuestions) * 100;
-        document.getElementById('quizProgressFill').style.width = progress + '%';
+        const progressBar = document.getElementById('quizProgressFill');
+        if (progressBar) {
+            progressBar.style.width = progress + '%';
+        }
     }
 
     updateQuestionCounter() {
         const counterText = `Question ${this.currentQuestion} of ${this.totalQuestions}`;
-        document.getElementById('questionCounter').textContent = counterText;
-        document.getElementById('questionCounterBottom').textContent = counterText;
+        const counter1 = document.getElementById('questionCounter');
+        const counter2 = document.getElementById('questionCounterBottom');
+        
+        if (counter1) counter1.textContent = counterText;
+        if (counter2) counter2.textContent = counterText;
     }
 
     updateNavigationButtons() {
         const prevBtn = document.getElementById('prevQuestion');
         const nextBtn = document.getElementById('nextQuestion');
 
-        // Previous button
-        prevBtn.disabled = this.currentQuestion === 1;
+        if (prevBtn) prevBtn.disabled = this.currentQuestion === 1;
 
-        // Next button
-        if (this.currentQuestion === this.totalQuestions) {
-            nextBtn.textContent = 'Get My Match →';
-            nextBtn.classList.add('submit');
-        } else {
-            nextBtn.textContent = 'Next →';
-            nextBtn.classList.remove('submit');
+        if (nextBtn) {
+            if (this.currentQuestion === this.totalQuestions) {
+                nextBtn.textContent = 'Get My Match →';
+                nextBtn.classList.add('submit');
+            } else {
+                nextBtn.textContent = 'Next →';
+                nextBtn.classList.remove('submit');
+            }
         }
     }
 
     submitQuiz() {
-        // Save final answer
         this.saveCurrentAnswer();
+        console.log('Final answers:', this.answers);
 
-        // Show results
         document.getElementById('results').classList.add('show');
         document.getElementById('loading').style.display = 'block';
         document.getElementById('matchResults').style.display = 'none';
