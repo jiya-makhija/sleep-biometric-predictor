@@ -85,6 +85,10 @@ body {
     margin-bottom: 20px;
 }
 
+.feature-grid:has(.feature-card:only-child) {
+    grid-template-columns: 1fr;
+}
+
 .feature-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
