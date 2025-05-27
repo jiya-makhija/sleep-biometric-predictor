@@ -390,12 +390,16 @@ class QuizController {
     }
 
     nextQuestion() {
-        // Skip validation for now
+        console.log('Next button clicked, current question:', this.currentQuestion);
+        
         this.saveCurrentAnswer();
+        console.log('Current answers:', this.answers);
     
         if (this.currentQuestion < this.totalQuestions) {
+            console.log('Moving to question:', this.currentQuestion + 1);
             this.animateToQuestion(this.currentQuestion + 1);
         } else {
+            console.log('Submitting quiz');
             this.submitQuiz();
         }
     }
