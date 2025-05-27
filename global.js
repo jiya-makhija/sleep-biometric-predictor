@@ -1,4 +1,3 @@
-// Interactive info section data
 const infoSections = [
     {
         title: "How This Works & Why It Matters",
@@ -93,7 +92,7 @@ const infoSections = [
     }
 ];
 
-// Real MMASH participant data (21 participants)
+// Real MMASH participant data
 const participants = [
     {id: "user_1", age: 29, gender: "M", sleepHours: 3.3, stressScore: 23, sleepLatency: 0, nightAwakenings: 9, meqScore: 47, psqi: 5, efficiency: 92.0},
     {id: "user_2", age: 27, gender: "M", sleepHours: 4.1, stressScore: 26, sleepLatency: 4, nightAwakenings: 18, meqScore: 52, psqi: 7, efficiency: 73.5},
@@ -118,7 +117,6 @@ const participants = [
     {id: "user_22", age: 26, gender: "M", sleepHours: 4.9, stressScore: 21, sleepLatency: 2, nightAwakenings: 12, meqScore: 49, psqi: 6, efficiency: 81.7}
 ];
 
-// Interactive info controller
 class InfoController {
     constructor() {
         this.currentSection = 0;
@@ -342,7 +340,7 @@ class InfoController {
         this.startAutoAdvance();
     }
 }
-// Quiz navigation controller
+
 class QuizController {
     constructor() {
         this.currentQuestion = 1;
@@ -414,7 +412,6 @@ class QuizController {
         const currentQuestionEl = document.getElementById(`question${this.currentQuestion}`);
         const targetQuestionEl = document.getElementById(`question${targetQuestion}`);
 
-        // Hide current question
         currentQuestionEl.classList.remove('active');
         currentQuestionEl.classList.add('prev');
 
@@ -533,7 +530,6 @@ class QuizController {
 }
 
 function initializePredictions() {
-    // Initialize quiz controller
     new QuizController();
 }
 
@@ -541,7 +537,6 @@ function findBestMatch(userProfile) {
     let bestMatch = null;
     let smallestDistance = Infinity;
 
-    // Convert user answers to MMASH ranges
     const stressRanges = [[15, 25], [25, 35], [35, 50], [50, 65], [65, 74]];
     const userStress = (stressRanges[userProfile.stressLevel - 1][0] + stressRanges[userProfile.stressLevel - 1][1]) / 2;
 
@@ -549,7 +544,6 @@ function findBestMatch(userProfile) {
     const userMeq = (meqRanges[userProfile.chronotype - 1][0] + meqRanges[userProfile.chronotype - 1][1]) / 2;
 
     participants.forEach(participant => {
-        // Calculate simple distance
         const ageDiff = Math.abs(participant.age - userProfile.age) / 20;
         const sleepDiff = Math.abs(participant.sleepHours - userProfile.sleepHours) / 7;
         const stressDiff = Math.abs(participant.stressScore - userStress) / 64;
@@ -557,7 +551,6 @@ function findBestMatch(userProfile) {
        const awakeningsDiff = Math.abs(participant.nightAwakenings - userProfile.nightAwakenings) / 40;
        const meqDiff = Math.abs(participant.meqScore - userMeq) / 26;
 
-       // Weighted distance
        const distance = Math.sqrt(
            Math.pow(ageDiff * 0.15, 2) +
            Math.pow(sleepDiff * 0.25, 2) +
@@ -661,8 +654,6 @@ function generateInsights(user, participant) {
    return insights.join('');
 }
 
-// Initialize everything when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
-   // Initialize interactive info controller
    new InfoController();
 });
