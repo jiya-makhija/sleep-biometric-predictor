@@ -534,9 +534,15 @@ function findBestMatch(userProfile) {
     const stressRanges = [[15, 25], [25, 35], [35, 50], [50, 65], [65, 74]];
     const userStress = (stressRanges[userProfile.stressLevel - 1][0] + stressRanges[userProfile.stressLevel - 1][1]) / 2;
 
-    const meqRanges = [[38, 45], [45, 52], [52, 58], [58, 64], [64, 70]];
+    const meqRanges = [
+        [16, 41],   // Definitely Evening (≤41)
+        [35, 41],   // Moderately Evening  
+        [42, 58],   // Neither/Intermediate (42-58)
+        [59, 70],   // Moderately Morning
+        [71, 86]    // Definitely Morning (≥59, but split into moderate/definite)
+    ];
     const userMeq = (meqRanges[userProfile.chronotype - 1][0] + meqRanges[userProfile.chronotype - 1][1]) / 2;
-
+    
     participants.forEach(participant => {
         const ageDiff = Math.abs(participant.age - userProfile.age) / 20;
         const sleepDiff = Math.abs(participant.sleepHours - userProfile.sleepHours) / 7;
