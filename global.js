@@ -4,10 +4,7 @@ const infoSections = [
         type: "overview",
         content: {
         features: [
-            {
-                title: "What You'll Get",
-                description: "Match with real participants from the MMASH sleep study based on your age, sleep patterns, stress levels, and chronotype preferences. Get personalized insights about your sleep compared to research participants."
-            },
+          
             {
                 title: "Real Science",
                 description: "Based on actual data from 21 participants aged 20-40 who underwent comprehensive 24-hour sleep monitoring. Understand your sleep latency, fragmentation, and quality using validated scientific instruments."
