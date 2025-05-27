@@ -390,18 +390,12 @@ class QuizController {
     }
 
     nextQuestion() {
-        // Validate current question
-        if (!this.validateCurrentQuestion()) {
-            return;
-        }
-
-        // Save current answer
+        // Skip validation for now
         this.saveCurrentAnswer();
-
+    
         if (this.currentQuestion < this.totalQuestions) {
             this.animateToQuestion(this.currentQuestion + 1);
         } else {
-            // Last question - submit
             this.submitQuiz();
         }
     }
